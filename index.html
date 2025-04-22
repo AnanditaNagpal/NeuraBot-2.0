@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NeuroBot - AI Chatbox</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #00adb5;
+        }
+        #chat {
+            width: 90%;
+            max-width: 600px;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            background-color: #1e1e1e;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin: 10px 0;
+        }
+        .user {
+            color: #4fc3f7;
+        }
+        .bot {
+            color: #81c784;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        button {
+            padding: 10px;
+            background-color: #00adb5;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #007f89;
+        }
+    </style>
+</head>
+<body>
+    <h1>NeuroBot</h1>
+    <div id="chat"></div>
+    <input id="userInput" type="text" placeholder="Ask something..." />
+    <button onclick="sendMessage()">Send</button>
+    <audio id="sound" src="send.mp3" preload="auto"></audio>
+
+    <script>
+        const chat = document.getElementById("chat");
+        const sound = document.getElementById("sound");
+
+        async function sendMessage() {
+            const input = document.getElementById("userInput");
+            const message = input.value.trim();
+            if (!message) return;
+
+            chat.innerHTML += `<div class="message user">You: ${message}</div>`;
+            input.value = "";
+            sound.play();
+
+            const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer YOUR_API_KEY_HERE"
+                },
+                body: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [{ role: "user", content: message }]
+                })
+            });
+            const data = await response.json();
+            const botMessage = data.choices[0].message.content;
+            chat.innerHTML += `<div class="message bot">NeuroBot: ${botMessage}</div>`;
+            chat.scrollTop = chat.scrollHeight;
+        }
+    </script>
+</body>
+</html>
